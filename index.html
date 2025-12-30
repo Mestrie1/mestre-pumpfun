@@ -19,6 +19,7 @@
     input, button { padding:10px; margin:5px 0; border-radius:5px; border:none; }
     button { cursor:pointer; background:#42f5a1; color:black; font-weight:bold; }
     footer { text-align:center; padding:30px; font-size:.9em; opacity:.7; }
+    ul { padding-left:20px; }
   </style>
 </head>
 <body>
@@ -39,6 +40,7 @@
 <div id="wallet">
   <h2>Crie sua carteira Tibúrcio</h2>
   <button onclick="createWallet()">Criar carteira</button>
+  <button onclick="loadWallet()">Conectar carteira existente</button>
   <p id="walletInfo"></p>
 </div>
 
@@ -48,11 +50,12 @@
   <input type="text" id="memeName" placeholder="Nome da sua memecoin">
   <button onclick="createMeme()">Criar memecoin</button>
   <p id="memeInfo"></p>
+  <h3>Histórico de Memecoins</h3>
+  <ul id="memeHistory"></ul>
 </div>
 
 <footer>Mestre Ensinador © 2025 — Luz, código e descentralização</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.min.js"></script>
 <script>
   // --------------------------
   // CANVAS ESTRELAS
@@ -82,32 +85,66 @@
   setInterval(updateOnlineCounter,2000);
 
   // --------------------------
-  // CRIAR CARTEIRA
+  // CARTEIRA TIBURCIO
   // --------------------------
-  let userWallet=null;
+  let userWallet = null;
+
   function createWallet(){
-    const wallet=ethers.Wallet.createRandom();
-    userWallet=wallet;
-    document.getElementById('walletInfo').innerText=`Endereço: ${wallet.address}\nChave privada: ${wallet.privateKey}`;
+    const address = 'TIB' + Math.floor(Math.random()*1e16).toString(16);
+    const privateKey = Math.random().toString(36).substring(2,18);
+    userWallet = {address, privateKey};
+    localStorage.setItem('tibWallet', JSON.stringify(userWallet));
+    document.getElementById('walletInfo').innerText = `Endereço: ${address}\nChave privada: ${privateKey}`;
+  }
+
+  function loadWallet(){
+    const walletData = localStorage.getItem('tibWallet');
+    if(walletData){
+      userWallet = JSON.parse(walletData);
+      document.getElementById('walletInfo').innerText = `Conectado: ${userWallet.address}`;
+    } else {
+      alert('Nenhuma carteira encontrada. Crie uma nova.');
+    }
   }
 
   // --------------------------
   // PUMPFUN — CRIAR MEMECOIN
   // --------------------------
-  function createMeme(){
+  async function createMeme(){
     if(!userWallet){ alert('Crie sua carteira primeiro!'); return; }
-    const name=document.getElementById('memeName').value;
+    const name = document.getElementById('memeName').value;
     if(!name){ alert('Digite o nome da memecoin'); return; }
-    const cost=Math.floor(Math.random()*100)+1; // custo em Tibúrcio
-    document.getElementById('memeInfo').innerText=`🎉 Memecoin "${name}" criada com sucesso!\nCusto: ${cost} Tibúrcio`;
+
+    try{
+      const response = await fetch('http://SEU_SERVIDOR:8082/create_meme', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          walletAddress: userWallet.address,
+          privateKey: userWallet.privateKey,
+          memeName: name
+        })
+      });
+      const data = await response.json();
+      document.getElementById('memeInfo').innerText = `🎉 Memecoin "${name}" criada com sucesso!\nCusto: ${data.cost} Tibúrcio`;
+
+      const history = document.getElementById('memeHistory');
+      const li = document.createElement('li');
+      li.textContent = `${name} — Custo: ${data.cost} Tibúrcio`;
+      history.appendChild(li);
+    } catch(e){
+      console.error(e);
+      alert('Erro ao criar memecoin. Verifique se o servidor Tibúrcio está rodando.');
+    }
   }
 
   // --------------------------
-  // SONS DE CANDLES SIMULADOS
+  // SONS SIMULADOS ONLINE
   // --------------------------
-  const soundGreen=new Audio('sounds/candle_green.mp3');
-  const soundRed=new Audio('sounds/candle_red.mp3');
-  const soundEpic=new Audio('sounds/marketcap.mp3');
+  const soundGreen = new Audio('https://cdn.jsdelivr.net/gh/Mestrie1/pumpfun-tiburcio/sounds/candle_green.mp3');
+  const soundRed = new Audio('https://cdn.jsdelivr.net/gh/Mestrie1/pumpfun-tiburcio/sounds/candle_red.mp3');
+  const soundEpic = new Audio('https://cdn.jsdelivr.net/gh/Mestrie1/pumpfun-tiburcio/sounds/marketcap.mp3');
+
   function playCandleSound(type){ if(type==='green') soundGreen.play(); if(type==='red') soundRed.play(); }
   function simulateCandle(){ const isGreen=Math.random()>0.5; if(isGreen) playCandleSound('green'); else playCandleSound('red'); setTimeout(simulateCandle,5000); }
   simulateCandle();
