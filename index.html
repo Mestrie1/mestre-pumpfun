@@ -61,6 +61,14 @@
       color: black;
     }
 
+    #onlineCounter {
+      margin-top: 20px;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #42f5a1;
+      text-shadow: 0 0 5px #42f5a1;
+    }
+
     footer {
       text-align: center;
       padding: 40px;
@@ -84,6 +92,9 @@
     <a href="https://github.com/Mestrie1/tiburcio-blockchain" target="_blank">Blockchain Tibúrcio</a>
     <a href="https://www.tiktok.com/@mestreensinador?_r=1&_t=ZS-92edf2i1T1h" target="_blank">TikTok</a>
   </div>
+
+  <!-- CONTADOR DE PESSOAS ONLINE -->
+  <p id="onlineCounter">👁️ Pessoas online agora: 0</p>
 </header>
 
 <footer>
@@ -91,6 +102,9 @@
 </footer>
 
 <script>
+  // --------------------------
+  // CANVAS ESTRELAS
+  // --------------------------
   const canvas = document.getElementById("space");
   const ctx = canvas.getContext("2d");
 
@@ -131,6 +145,43 @@
   }
 
   animate();
+
+  // --------------------------
+  // CONTADOR DE PESSOAS ONLINE
+  // --------------------------
+  let onlineCount = Math.floor(Math.random() * 50) + 1;
+
+  function updateOnlineCounter() {
+    onlineCount += Math.floor(Math.random() * 3) - 1;
+    if (onlineCount < 1) onlineCount = 1;
+    document.getElementById('onlineCounter').innerText = `👁️ Pessoas online agora: ${onlineCount}`;
+  }
+
+  setInterval(updateOnlineCounter, 2000);
+
+  // --------------------------
+  // SONS DE CANDLES (SIMULAÇÃO)
+  // --------------------------
+  // OBS: coloque os arquivos .mp3 na pasta "sounds"
+  const soundGreen = new Audio('sounds/candle_green.mp3'); // candle subindo
+  const soundRed = new Audio('sounds/candle_red.mp3');     // candle descendo
+  const soundEpic = new Audio('sounds/marketcap.mp3');     // marketcap épico
+
+  function playCandleSound(type) {
+    if(type === 'green') soundGreen.play();
+    if(type === 'red') soundRed.play();
+  }
+
+  function simulateCandle() {
+    const isGreen = Math.random() > 0.5;
+    if(isGreen) playCandleSound('green');
+    else playCandleSound('red');
+
+    // Dispara novamente a cada 5 segundos
+    setTimeout(simulateCandle, 5000);
+  }
+
+  simulateCandle();
 </script>
 
 </body>
