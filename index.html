@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mestre PUMPFUN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    header {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 3s infinite;
+    }
+
+    @keyframes glow {
+      0% { filter: drop-shadow(0 0 5px #fff); }
+      50% { filter: drop-shadow(0 0 20px #0ff); }
+      100% { filter: drop-shadow(0 0 5px #fff); }
+    }
+
+    p {
+      max-width: 700px;
+      margin: auto;
+      font-size: 1.2em;
+    }
+
+    .links a {
+      display: inline-block;
+      margin: 15px;
+      padding: 12px 20px;
+      border: 2px solid white;
+      color: white;
+      text-decoration: none;
+      border-radius: 30px;
+      transition: 0.3s;
+    }
+
+    .links a:hover {
+      background: white;
+      color: black;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="space"></canvas>
+
+<header>
+  <h1>Mestre PUMPFUN</h1>
+  <p>
+    Plataforma onde Tibúrcio é minerado diretamente no site.<br>
+    Crie sua carteira, mineire online e use Tibúrcio para criar memecoins.
+  </p>
+
+  <div class="links">
+    <a href="https://github.com/Mestrie1/tiburcio-blockchain" target="_blank">Blockchain Tibúrcio</a>
+    <a href="https://www.tiktok.com/@mestreensinador?_r=1&_t=ZS-92edf2i1T1h" target="_blank">TikTok</a>
+  </div>
+</header>
+
+<footer>
+  Mestre Ensinador © 2025 — Luz, código e descentralização
+</footer>
+
+<script>
+  const canvas = document.getElementById("space");
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  let stars = Array.from({length: 300}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    z: Math.random() * canvas.width
+  }));
+
+  function animate() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+      s.z -= 2;
+      if (s.z <= 0) s.z = canvas.width;
+
+      const k = 128 / s.z;
+      const x = s.x * k + canvas.width / 2;
+      const y = s.y * k + canvas.height / 2;
+
+      if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+        const size = (1 - s.z / canvas.width) * 2;
+        ctx.fillRect(x, y, size, size);
+      }
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
+
+</body>
+</html>
