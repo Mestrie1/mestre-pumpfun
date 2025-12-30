@@ -1,104 +1,116 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Mestre PUMPFUN</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {margin:0;background:black;color:white;font-family:Arial, sans-serif;overflow-x:hidden;}
-canvas{position:fixed;top:0;left:0;z-index:-1;}
-header{text-align:center;padding:60px 20px;}
-h1{font-size:3em;background:linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet);
--webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 3s infinite;}
-@keyframes glow{0%{filter:drop-shadow(0 0 5px #fff);}50%{filter:drop-shadow(0 0 20px #0ff);}100%{filter:drop-shadow(0 0 5px #fff);}}
-p{max-width:700px;margin:auto;font-size:1.2em;}
-.links a{display:inline-block;margin:10px;padding:10px 15px;border:2px solid white;color:white;text-decoration:none;border-radius:20px;transition:0.3s;}
-.links a:hover{background:white;color:black;}
-#onlineCounter{margin-top:20px;font-size:1.3em;font-weight:bold;color:#42f5a1;text-shadow:0 0 5px #42f5a1;}
-footer{text-align:center;padding:30px;font-size:0.9em;opacity:0.7;}
-button{margin:10px;padding:10px 20px;font-size:1em;border-radius:15px;border:none;background:#42f5a1;color:black;cursor:pointer;}
-button:hover{background:#36c48c;color:white;}
-</style>
+  <meta charset="UTF-8">
+  <title>Mestre PUMPFUN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; background:black; color:white; font-family:Arial,sans-serif; overflow-x:hidden;}
+    canvas { position:fixed; top:0; left:0; z-index:-1; }
+    header { text-align:center; padding:50px 20px; }
+    h1 { font-size:3em; background:linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:glow 3s infinite; }
+    @keyframes glow { 0%{filter:drop-shadow(0 0 5px #fff);} 50%{filter:drop-shadow(0 0 20px #0ff);} 100%{filter:drop-shadow(0 0 5px #fff);} }
+    p { max-width:700px; margin:auto; font-size:1.2em; }
+    .links a { display:inline-block; margin:10px; padding:10px 20px; border:2px solid white; color:white; text-decoration:none; border-radius:20px; transition:.3s; }
+    .links a:hover{ background:white; color:black; }
+    #onlineCounter { margin-top:20px; font-size:1.2em; color:#42f5a1; text-shadow:0 0 5px #42f5a1; }
+    #wallet { margin:20px auto; max-width:600px; background:#111; padding:20px; border-radius:10px; }
+    #pumpfun { margin:20px auto; max-width:600px; background:#111; padding:20px; border-radius:10px; }
+    input, button { padding:10px; margin:5px 0; border-radius:5px; border:none; }
+    button { cursor:pointer; background:#42f5a1; color:black; font-weight:bold; }
+    footer { text-align:center; padding:30px; font-size:.9em; opacity:.7; }
+  </style>
 </head>
 <body>
 
 <canvas id="space"></canvas>
 
 <header>
-<h1>Mestre PUMPFUN</h1>
-<p>Plataforma online onde Tibúrcio é minerado diretamente no site.<br>Crie sua carteira, mineire e use Tibúrcio para criar memecoins.</p>
+  <h1>Mestre PUMPFUN</h1>
+  <p>Plataforma online onde Tibúrcio é minerado direto no site.<br>Crie sua carteira, mineire e use Tibúrcio para criar memecoins.</p>
+  <div class="links">
+    <a href="https://github.com/Mestrie1/tiburcio-blockchain" target="_blank">Blockchain Tibúrcio</a>
+    <a href="https://www.tiktok.com/@mestreensinador?_r=1&_t=ZS-92edf2i1T1h" target="_blank">TikTok</a>
+  </div>
+  <p id="onlineCounter">👁️ Pessoas online agora: 0</p>
+</header>
 
-<div class="links">
-<a href="https://github.com/Mestrie1/tiburcio-blockchain" target="_blank">Blockchain Tibúrcio</a>
-<a href="https://www.tiktok.com/@mestreensinador?_r=1&_t=ZS-92edf2i1T1h" target="_blank">TikTok</a>
+<!-- Carteira -->
+<div id="wallet">
+  <h2>Crie sua carteira Tibúrcio</h2>
+  <button onclick="createWallet()">Criar carteira</button>
+  <p id="walletInfo"></p>
 </div>
 
-<p id="onlineCounter">👁️ Pessoas online agora: 0</p>
-
-<button onclick="createWallet()">Criar Carteira</button>
-<button onclick="mineWallet()">Minerar Tibúrcio</button>
-</header>
+<!-- Pumpfun -->
+<div id="pumpfun">
+  <h2>PumpFun — Crie sua memecoin</h2>
+  <input type="text" id="memeName" placeholder="Nome da sua memecoin">
+  <button onclick="createMeme()">Criar memecoin</button>
+  <p id="memeInfo"></p>
+</div>
 
 <footer>Mestre Ensinador © 2025 — Luz, código e descentralização</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.min.js"></script>
 <script>
-// ------------------ ESTRELAS ------------------
-const canvas=document.getElementById("space");
-const ctx=canvas.getContext("2d");
-function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-window.addEventListener("resize",resize);
-resize();
-let stars=Array.from({length:300},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,z:Math.random()*canvas.width}));
-function animate(){
-  ctx.fillStyle="black";ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="white";stars.forEach(s=>{
-    s.z-=2;if(s.z<=0)s.z=canvas.width;
-    const k=128/s.z,x=s.x*k+canvas.width/2,y=s.y*k+canvas.height/2;
-    if(x>=0&&x<=canvas.width&&y>=0&&y<=canvas.height){const size=(1-s.z/canvas.width)*2;ctx.fillRect(x,y,size,size);}
-  });
-  requestAnimationFrame(animate);
-}
-animate();
+  // --------------------------
+  // CANVAS ESTRELAS
+  // --------------------------
+  const canvas = document.getElementById("space");
+  const ctx = canvas.getContext("2d");
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  window.addEventListener("resize",resize);
+  resize();
+  let stars = Array.from({length:300},()=>({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*canvas.width}));
+  function animate(){
+    ctx.fillStyle="black"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="white"; stars.forEach(s=>{
+      s.z-=2; if(s.z<=0) s.z=canvas.width;
+      const k=128/s.z, x=s.x*k+canvas.width/2, y=s.y*k+canvas.height/2;
+      if(x>=0 && x<=canvas.width && y>=0 && y<=canvas.height){ const size=(1-s.z/canvas.width)*2; ctx.fillRect(x,y,size,size);}
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
 
-// ------------------ SONS ------------------
-const soundGreen=new Audio('sounds/candle_green.mp3');
-const soundRed=new Audio('sounds/candle_red.mp3');
-const soundEpic=new Audio('sounds/marketcap.mp3');
+  // --------------------------
+  // CONTADOR DE PESSOAS ONLINE
+  // --------------------------
+  let onlineCount=Math.floor(Math.random()*50)+1;
+  function updateOnlineCounter(){ onlineCount+=Math.floor(Math.random()*3)-1; if(onlineCount<1)onlineCount=1; document.getElementById('onlineCounter').innerText=`👁️ Pessoas online agora: ${onlineCount}`; }
+  setInterval(updateOnlineCounter,2000);
 
-function playCandleSound(type){if(type==='green')soundGreen.play();if(type==='red')soundRed.play();}
+  // --------------------------
+  // CRIAR CARTEIRA
+  // --------------------------
+  let userWallet=null;
+  function createWallet(){
+    const wallet=ethers.Wallet.createRandom();
+    userWallet=wallet;
+    document.getElementById('walletInfo').innerText=`Endereço: ${wallet.address}\nChave privada: ${wallet.privateKey}`;
+  }
 
-// ------------------ BACKEND SIMULADO ------------------
-let userWallet=null;
-let wallets={}; // endereço -> saldo
+  // --------------------------
+  // PUMPFUN — CRIAR MEMECOIN
+  // --------------------------
+  function createMeme(){
+    if(!userWallet){ alert('Crie sua carteira primeiro!'); return; }
+    const name=document.getElementById('memeName').value;
+    if(!name){ alert('Digite o nome da memecoin'); return; }
+    const cost=Math.floor(Math.random()*100)+1; // custo em Tibúrcio
+    document.getElementById('memeInfo').innerText=`🎉 Memecoin "${name}" criada com sucesso!\nCusto: ${cost} Tibúrcio`;
+  }
 
-async function createWallet(){
-  if(userWallet){alert("Você já possui carteira!");return;}
-  const address=Math.random().toString(36).substring(2,15);
-  userWallet={address:address,balance:0};
-  wallets[address]=0;
-  alert(`Carteira criada!\nEndereço: ${address}`);
-  updateOnlineCounter();
-}
-
-async function mineWallet(){
-  if(!userWallet){alert("Crie uma carteira primeiro!");return;}
-  const reward=Math.floor(Math.random()*5)+1;
-  userWallet.balance+=reward;
-  wallets[userWallet.address]=userWallet.balance;
-  const isGreen=Math.random()>0.5;
-  if(isGreen)playCandleSound('green');else playCandleSound('red');
-  if(userWallet.balance>=100){soundEpic.play();}
-  alert(`Você minerou ${reward} Tiburcios!\nSaldo: ${userWallet.balance}`);
-  updateOnlineCounter();
-}
-
-function updateOnlineCounter(){
-  const online=Object.keys(wallets).length;
-  document.getElementById('onlineCounter').innerText=`👁️ Pessoas online agora: ${online}`;
-}
-
-setInterval(updateOnlineCounter,5000);
+  // --------------------------
+  // SONS DE CANDLES SIMULADOS
+  // --------------------------
+  const soundGreen=new Audio('sounds/candle_green.mp3');
+  const soundRed=new Audio('sounds/candle_red.mp3');
+  const soundEpic=new Audio('sounds/marketcap.mp3');
+  function playCandleSound(type){ if(type==='green') soundGreen.play(); if(type==='red') soundRed.play(); }
+  function simulateCandle(){ const isGreen=Math.random()>0.5; if(isGreen) playCandleSound('green'); else playCandleSound('red'); setTimeout(simulateCandle,5000); }
+  simulateCandle();
 </script>
-
 </body>
 </html>
